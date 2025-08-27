@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Internetowice 3A</title>
+  <style>
+    body {
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      background: #e0f7fa;
+      color: #006064;
+      margin: 0;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    header {
+      background: #00838f;
+      color: white;
+      padding: 40px;
+      border-radius: 15px;
+      margin-bottom: 20px;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .card {
+      background: white;
+      padding: 20px;
+      margin: 15px auto;
+      max-width: 800px;
+      border-radius: 10px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+      text-align: left;
+    }
+    .photo-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin: 20px 0;
+    }
+    .photo-grid img {
+      width: 120px;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 3px solid #00838f;
+    }
+    footer {
+      margin-top: 50px;
+      text-align: center;
+      color: #666;
+      font-size: 0.9em;
+    }
+    iframe {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      width: 100%;
+      height: 400px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🌐 Internetowice 3A</h1>
+      <p>Nasza klasowa przestrzeń w internecie ❤️</p>
+    </header>
+
+    <!-- Galeria -->
+    <div class="card">
+      <h2>📸 Galeria pamiątek</h2>
+      <div class="photo-grid">
+        <img src="https://via.placeholder.com/120/00838f/FFFFFF?text=Wycieczka" alt="Wycieczka">
+        <img src="https://via.placeholder.com/120/00838f/FFFFFF?text=Bal" alt="Bal">
+        <img src="https://via.placeholder.com/120/00838f/FFFFFF?text=Fizyka" alt="Fizyka">
+        <img src="https://via.placeholder.com/120/00838f/FFFFFF?text=ZSP" alt="ZSP">
+      </div>
+      <p><small>Dodamy Twoje zdjęcia – daj znać!</small></p>
+    </div>
+
+    <!-- Tablica ogłoszeń -->
+    <div class="card">
+      <h2>📌 Tablica ogłoszeniowa</h2>
+      <p><strong>Kasia:</strong> Ma ktoś notatki z chemii? Daj znać na priv!</p>
+      <p><strong>Jarek:</strong> Jutro zbieramy się o 8:00 przed szkołą – wycieczka!</p>
+      <p><strong>Admin:</strong> Sprawdzian z matmy przesunięty na piątek.</p>
+    </div>
+
+    <!-- Nadchodzące wydarzenia -->
+    <div class="card">
+      <h2>📅 Nadchodzące wydarzenia</h2>
+      <ul>
+        <li>15.04 – Sprawdzian z matmy (nie zapomnij kalkulatora!)</li>
+        <li>20.04 – Bal klasowy! 🎉</li>
+      </ul>
+    </div>
+
+    <!-- Formularz dodawania postów -->
+    <div class="card">
+      <h2>💬 Dodaj ogłoszenie</h2>
+      <p><small>Chcesz coś przekazać klasie? Napisz tu – notatki, pytania, gratulacje!</small></p>
+      <iframe 
+        src="https://docs.google.com/forms/d/e/1FAIpQLSdjBXSAJ71CER-LeZXfJtHlQHEtOESB9CfOgQLWYfB7Ev0-Rg/viewform?embedded=true" 
+        frameborder="0" 
+        marginheight="0" 
+        marginwidth="0">
+        Ładowanie formularza...
+      </iframe>
+    </div>
+
+    <!-- Miejsce na posty z klasy -->
+    <div class="card">
+      <h2>📩 Wszystkie wiadomości z klasy</h2>
+      <div id="posts-container">
+        Ładowanie postów... (odśwież stronę, jeśli nie widzisz)
+      </div>
+    </div>
+
+    <!-- Skrypt do wczytywania postów -->
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const sheetId = "1UNH7I4cGty6ffLC-Kvjk9rq4XZLxuuqHcLkgPfMErtI";
+        const url = `https://spreadsheets.google.com/feeds/list/${sheetId}/1/public/values?alt=json`;
+
+        const container = document.getElementById("posts-container");
+
+        fetch(url)
+          .then(response => {
+            if (!response.ok) throw new Error("Błąd sieci");
+            return response.json();
+          })
+          .then(data => {
+            const entries = data.feed.entry || [];
+            
+            if (entries.length === 0) {
+              container.innerHTML = "<p>Brak postów. Bądź pierwszy!</p>";
+              return;
+            }
+
+            const postsHTML = entries.map(entry => {
+              const imie = entry.gsx$imięczyksywka?.$t.trim() || "Anonimowy";
+              const tresc = entry.gsx$treściposta?.$t.trim() || "(pusta treść)";
+              return `
+                <div style="
+                  margin: 10px 0;
+                  padding: 12px;
+                  background: #fff;
+                  border-left: 5px solid #00838f;
+                  border-radius: 0 8px 8px 0;
+                  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+                ">
+                  <strong>${imie}:</strong> ${tresc}
+                </div>
+              `;
+            }).join("");
+
+            container.innerHTML = postsHTML;
+          })
+          .catch(err => {
+            console.error("Błąd ładowania postów:", err);
+            container.innerHTML = `
+              <p style="color: #d32f2f">
+                Nie można załadować postów. Spróbuj odświeżyć stronę.
+              </p>
+            `;
+          });
+      });
+    </script>
+
+    <!-- Stopka -->
+    <footer>
+      Strona stworzona przez uczniów. Działa dzięki GitHub Pages – za DARMO! ✨<br>
+      Udostępnij link: <strong>bit.ly/internetowice3a</strong>
+    </footer>
+  </div>
+</body>
+</html>
